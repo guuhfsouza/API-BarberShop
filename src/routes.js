@@ -10,7 +10,7 @@ const login = require('./middleware/login');
 const routes = express.Router();
 
 routes.get('/users', UserController.index);
-routes.post('/users', login, UserController.create);
+routes.post('/users', UserController.create);
 routes.put('/users', login, UserController.update);
 
 routes.get('/people', PeopleController.index);

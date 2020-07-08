@@ -1,5 +1,6 @@
 const connection = require('../database/connection');
-//const generatePass = require('../utils/generatePass');
+const sendEmail = require('../middleware/sendEmail');
+const generatePass = require('../utils/generatePass');
 
 module.exports = {
 
@@ -20,43 +21,31 @@ module.exports = {
     },
     
     async create(request, response) {
-        const { cpf_People, email, password, active, typeUser, nameUser} = request.body;
-        
-
+        const {email} = request.body;
         try {
             const usersValidation = await connection('Users').select('*')
-            .where(
-                'email', email)
-                .andWhere('cpf_People', cpf_People)
-                .first();
+            .where('email', email).first();
             
             if(!usersValidation){
                  
-                const date = new Date();
-                const created_At = date.getDate() + '/' +
-                (date.getMonth()+1).toString() + '/' + date.getFullYear();
-                
-
-
-//                const pass = generatePass();
+                const passRender = generatePass();
                 await connection('Users').insert({
-                    cpf_People,
                     email, 
-                    password,
-                    created_At,
-                    active,
+                    passwor: passRender,
                     typeUser,
-                    nameUser
                 });
 
-            return response.json({sucess: "Usuário criado com sucesso. Realize a recuperção de senha"}); //quebra galho
+                const customerShippingData = { passRender : passRender, email : email};
+                const res = await sendEmail.sendEmail(customerShippingData)
+                if(res !== '')
+                    return response.status(200).send({sucess: `Usuário criado com sucesso. Senha padão enviada para o email informado`});
             }
             else{
-                return response.json({ warning: "Usuário já existe para sua loja. Favor recuperar senha."});
+                return response.status(400).send({ warning: "Usuário já existe. Favor recuperar senha."});
             }
         }
         catch (err){
-            return response.status(500).json({error: err});
+            return response.status(500).send({error: err});
         }
 
     },

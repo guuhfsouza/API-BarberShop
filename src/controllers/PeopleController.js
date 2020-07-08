@@ -1,6 +1,4 @@
 const connection = require('../database/connection');
-const sendEmail = require('../middleware/sendEmail');
-const generatePass = require('../utils/generatePass');
 
 module.exports = {
     
@@ -33,9 +31,9 @@ module.exports = {
         try{
 
             //construção da data
-            // const date = new Date();
-            // const created_at = date.getDate() + '/' +
-            // (date.getMonth()+1).toString() + '/' + date.getFullYear();
+            const date = new Date();
+            const created_at = date.getDate() + '/' +
+            (date.getMonth()+1).toString() + '/' + date.getFullYear();
         
             let profileValidation = await connection('People').
             select('*').where('email', email).first();
@@ -43,24 +41,17 @@ module.exports = {
 
             if(!profileValidation){
 
-                // await connection('People')
-                // .insert({
-                //     firstName,
-                //     lastName,           
-                //     cel, 
-                //     email, 
-                //     tipeProfile,
-                //     created_at  
-                // });
-                const passRender = generatePass();
-                const customerShippingData = { passRender : passRender, email : email};
-                sendEmail.sendEmail(customerShippingData).then(
-                    (res) => {
-                        console.log(res.messageId)
-                        if(res.messageId !== '')
-                            return response.status(200).send({sucess: "Dados salvos com sucesso."});
-                    }
-                );
+                await connection('People')
+                .insert({
+                    firstName,
+                    lastName,           
+                    cel, 
+                    email, 
+                    tipeProfile,
+                    created_at  
+                });
+
+                return response.status(200).send({sucess: "Dados salvos com sucesso."});
             }
             else{
                 return response.status(400).send({alert: "Dados já cadastrados."});

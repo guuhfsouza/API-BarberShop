@@ -12,8 +12,8 @@ const transporter = nodemailer.createTransport({
      }
 });
 
-exports.sendEmail = (customerShippingData) => {
-        const send = transporter.sendMail({
+exports.sendEmail = async (customerShippingData) => {
+            const response = await transporter.sendMail({
             from: `Barber Shop <gustavof_souza@outlook.com>`,
             to: customerShippingData.email,
             subject: 'Barber Shop - Senha padrão',
@@ -21,10 +21,10 @@ exports.sendEmail = (customerShippingData) => {
                 `Olá,
                 Sua senha padrão é a senha: ${customerShippingData.passRender}.
                 Faça a alteração através da opção Recuperar Senha`,
-        }, (error, info)=>{
-            if(error)
-                return error
-            else
-                return info.messageId
         });
+
+        if(!response.messageId)
+            return response.status(400).send({error: 'falha no envio do email'})
+        else
+            return response.messageId;
 }

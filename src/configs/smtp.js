@@ -3,5 +3,5 @@ module.exports = {
     host: 'smtp.live.com',
     port: 465,
     user: 'gustavof_souza@outlook.com',
-    pass: 'san230864dra'    
+    pass: 'san230864dra.'    
 }

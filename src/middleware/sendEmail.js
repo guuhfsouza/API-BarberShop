@@ -1,5 +1,4 @@
 const nodemailer = require('nodemailer');
-
 const config_smtp = require('../configs/smtp');
 
 const transporter = nodemailer.createTransport({

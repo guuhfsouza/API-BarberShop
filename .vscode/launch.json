@@ -1,0 +1,25 @@
+{
+    //Criar um arquivo nodemon.json para que possa ligar o debbug ao servidor já em execução.
+    //Configuração do arquivo nodemon.json
+    // {
+    //     "execMap":{
+    //         "js": "node --inspect" 
+    //     }
+    // }
+
+    
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "attach", //alterado a request para attach
+            "protocol": "inspector", // adicionado essa opção
+            "restart": true, // adicionado essa opção
+            "name": "Launch Program",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            // "program": "${workspaceFolder}\\index.js" // remover essa opção
+        }
+    ]
+}

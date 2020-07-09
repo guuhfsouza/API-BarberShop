@@ -6,14 +6,12 @@ module.exports = {
         const {idPeople, email} = request.body;
     
         try{
-            console.log('try')
             const profile = await connection('People')
             .select('*')
             .where('email', email)
        //     .orWhere('idPeople', idPeople)
             .first();
 
-            console.log(profile)
             if(!profile ){
                 return response.status(400).send({error: "Dados ainda não cadastrados."})
             }
@@ -36,12 +34,12 @@ module.exports = {
             (date.getMonth()+1).toString() + '/' + date.getFullYear();
         
             let profileValidation = await connection('People').
-            select('*').where('email', email).first();
+            select('*').where('email', email + "2").first();
                        
 
             if(!profileValidation){
 
-                await connection('People')
+                const returnRequestDB = await connection('People')
                 .insert({
                     firstName,
                     lastName,           
@@ -49,9 +47,10 @@ module.exports = {
                     email, 
                     tipeProfile,
                     created_at  
-                });
+                }).returning('idPeople');
 
-                return response.status(200).send({sucess: "Dados salvos com sucesso."});
+                return response.status(200).json({sucess: "Dados salvos com sucesso.",
+                 idPeople: returnRequestDB[0]});
             }
             else{
                 return response.status(400).send({alert: "Dados já cadastrados."});

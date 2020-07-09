@@ -21,21 +21,24 @@ module.exports = {
     },
     
     async create(request, response) {
-        const {email} = request.body;
+        const {email, idPeople} = request.body;
         try {
             const usersValidation = await connection('Users').select('*')
             .where('email', email).first();
             
             if(!usersValidation){
                  
-                const passRender = generatePass();
-                await connection('Users').insert({
+                const password = generatePass();
+                const data = {
                     email, 
-                    passwor: passRender,
-                    typeUser,
-                });
+                    password,
+                    typeUser : 'cliente',
+                    idPeople
+                }
+                data;                
+                await connection('users').insert(data);
 
-                const customerShippingData = { passRender : passRender, email : email};
+                const customerShippingData = { passRender : password, email : email};
                 const res = await sendEmail.sendEmail(customerShippingData)
                 if(res !== '')
                     return response.status(200).send({sucess: `Usuário criado com sucesso. Senha padão enviada para o email informado`});

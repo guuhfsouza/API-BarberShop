@@ -17,7 +17,7 @@ routes.get('/people', PeopleController.index);
 routes.post('/people', login, PeopleController.create);
 routes.put('/people', login, PeopleController.update);
 
-routes.get('/schedules', ScheduleController.index);
+routes.get('/schedules', login, ScheduleController.index);
 routes.post('/schedules', login, ScheduleController.create);
 routes.put('/schedules', login, ScheduleController.update);
 

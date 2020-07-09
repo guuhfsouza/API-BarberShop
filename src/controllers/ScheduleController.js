@@ -2,81 +2,87 @@ const connection = require('../database/connection');
 
 module.exports = {
 
+
+    //corrigir select do index.
     async index(request, response) {
-        const cpfStore = request.headers.authorization;
-        const date = request.headers.date;
+        const {idPeople, date} = request.body
         try{
             const schedules = await connection('Schedule')
-            .where('Schedule.cpfStore', cpfStore)
+            .where('Schedule.idProfessional', idPeople)
+            // .orWhere('Schedule.idClient', idClient)
             .andWhere('Schedule.date', date)
-            .join('Service', 'Service.idService', '=', 'Schedule.idService')
-            .join('Users', 'Users.idUser', '=', 'Schedule.idUser')
-            .select('Schedule.idSchedule ', 
-            'Schedule.client', 'Service.service',
-            'Schedule.date', 'Schedule.status', 'Service.price', 'Users.nameUser')
+            
+            .join('People AS client', 'client.idPeople', '=', 'Schedule.idClient')
+            .join('People AS professional', 'professional.idPeople', '=', 'Schedule.idProfessional')
+            // function() {
+            //     this.on('People.idClient', '=', 'Schedule.idClient')
+            //     .orOn('People.idPeople', '=', 'Schedule.idProfessional')
+            // })
+            .select('Schedule.idSchedule', 'Schedule.idProfessional', 'Schedule.idClient',
+            'client.firstName', 
+            'Schedule.date', 'Schedule.hour'
+            )
 
             if(!schedules){
-                return response.json({ warning: 'Sem agenda para a data.'})                
+                return response.send({ warning: 'Sem agenda para a data.'})                
             }
 
             return response.json(schedules);
         }catch (err) {
-            return response.status(500).json({error: err})
+            return response.status(500).send({error: err})
         } 
     },
 
     async create(request, response) {
-        const { idService, client, date, status, cpfStore, idUser, hour} = request.body;
-
+        const { idClient, idProfessional, date, hour} = request.body;
+    
         const validateSchedule = await connection('Schedule').
-        select("*").where('idUser', idUser).andWhere('date', date).andWhere('hour', hour).first();
+        select("*").where('idClient', idClient).orWhere('idProfessional', idProfessional)
+        .andWhere('date', date).andWhere('hour', hour).first();
 
-        if(validateSchedule)
-            return response.json({ warning: "O horário já está preenchido. Encontre outro horário"});
+       if(validateSchedule)
+            return response.send({ warning: "O horário já está preenchido. Encontre outro horário"});
+        
 
         try{
              await connection('Schedule')
             .insert({
-                idService,
-                client,
+                idProfessional,
+                idClient,
                 date,
-                status,
-                cpfStore,
-                idUser,
                 hour
-            })
+            });
 
-            return response.json({ sucess: `Horário do dia ${date} as ${hour} agendado com sucesso para o Sr(a) ${client}`});
+            return response.send({ sucess: `Horário do dia ${date} as ${hour} agendado com sucesso.`});
     
         }
         catch (err){
-            return response.status(500).json({ error: err})
+            return response.status(500).send({ error: err})
         }
     },
 
     async update(request, response) {
-        const cpfStore = request.headers.authorization;
-        const { idSchedule, idService, client, date, status} = request.body;
+        const { idSchedule, idProfessional, idClient, date, hour} = request.body;
         
         try{
 
-            const scheduleValidation = await connection('Schedule')
-            .select('cpfStore')
+            const scheduleAndProfessonalValidation = await connection('Schedule')
+            .select('idProfessional', 'idClient')
             .where('idSchedule', idSchedule)
-            .first(0);
+            .first();
 
-
-            if(scheduleValidation.cpfStore !== cpfStore){
-                return response.status(400).json({ warning: 'Sem autorização para alteração da agenda.'})
+            if(scheduleAndProfessonalValidation.idProfessional !== idProfessional || 
+                scheduleAndProfessonalValidation.idClient !== idClient){
+                return response.status(400).send({ warning: 'Sem autorização para alteração da agenda.'})
             }
 
             await connection('Schedule')
             .where('idSchedule', idSchedule)
             .update({
-                idService,
-                client,
+                idProfessional,
+                idClient,
                 date,
-                status,
+                hour,
             })
 
             return response.json({ sucess: 'Agenda ataulizada com sucesso.'})

@@ -17,8 +17,8 @@ module.exports = {
       //#region conexão externa
       // server: 'den1.mssql8.gear.host',
       // user: 'agendaonline1',
-      // password: 'san230864dra.',
-      // database : 'agendaonline1',
+      // password: '',
+      // database : '',
       //#endregion
       options: {    
           enableArithAbort: true

@@ -1,26 +1,21 @@
 const connection = require('../database/connection');
 
 module.exports = {
-
-
-    //corrigir select do index.
     async index(request, response) {
         const {idPeople, date} = request.body
         try{
             const schedules = await connection('Schedule')
-            .where('Schedule.idProfessional', idPeople)
-            // .orWhere('Schedule.idClient', idClient)
+            .where('Schedule.idClient', idPeople)
             .andWhere('Schedule.date', date)
-            
             .join('People AS client', 'client.idPeople', '=', 'Schedule.idClient')
             .join('People AS professional', 'professional.idPeople', '=', 'Schedule.idProfessional')
-            // function() {
-            //     this.on('People.idClient', '=', 'Schedule.idClient')
-            //     .orOn('People.idPeople', '=', 'Schedule.idProfessional')
-            // })
-            .select('Schedule.idSchedule', 'Schedule.idProfessional', 'Schedule.idClient',
-            'client.firstName', 
-            'Schedule.date', 'Schedule.hour'
+            .select('Schedule.idSchedule', 
+            'Schedule.idProfessional', 
+            'professional.firstName AS professionalName',
+            'Schedule.idClient',
+            'client.firstName AS clientName', 
+            'Schedule.date',
+            'Schedule.hour'
             )
 
             if(!schedules){
